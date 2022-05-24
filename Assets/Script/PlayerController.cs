@@ -27,10 +27,13 @@ public class PlayerController : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Debug.Log("pressed");
+           
         }else if (Input.GetKey(KeyCode.Space))
         {
-            Debug.Log("pressing..");
+            
+        }else if (Input.GetKeyUp(KeyCode.Space))
+        {
+
         }
     }
 }
