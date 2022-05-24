@@ -25,12 +25,16 @@ public class PlayerController : MonoBehaviour
         {
             characterMovement.MoveLeft(gameObject);
         }
+
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Debug.Log("pressed");
+            //initial jump,set upward speed
         }else if (Input.GetKey(KeyCode.Space))
         {
-            Debug.Log("pressing..");
+           // while holding, upward speed decrease towards 0(decrease by gravity downward speed)
+        }else if (Input.GetKeyUp(KeyCode.Space))
+        {
+            //upward speed = 0
         }
     }
 }
