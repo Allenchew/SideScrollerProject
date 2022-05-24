@@ -7,13 +7,13 @@ public class PlayerController : MonoBehaviour
     private Movement characterMovement = new Movement();
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
     private void FixedUpdate()
     {
@@ -29,12 +29,15 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             //initial jump,set upward speed
-        }else if (Input.GetKey(KeyCode.Space))
+        }
+        else if (Input.GetKey(KeyCode.Space))
         {
-           // while holding, upward speed decrease towards 0(decrease by gravity downward speed)
-        }else if (Input.GetKeyUp(KeyCode.Space))
+            // while holding, upward speed decrease towards 0(decrease by gravity downward speed)
+        }
+        else if (Input.GetKeyUp(KeyCode.Space))
         {
             //upward speed = 0
 
+        }
     }
 }
