@@ -35,6 +35,6 @@ public class PlayerController : MonoBehaviour
         }else if (Input.GetKeyUp(KeyCode.Space))
         {
             //upward speed = 0
-        }
+
     }
 }
