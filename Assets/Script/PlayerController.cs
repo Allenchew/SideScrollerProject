@@ -2,9 +2,40 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class PlayerController : MonoBehaviour
 {
     private Movement characterMovement = new Movement();
+
+    Playercontrols controls;
+    public void OnEnable()
+    {
+        if (controls == null)
+        {
+            controls = new Playercontrols();
+            // Tell the "gameplay" action map that we want to get told about
+            // when actions get triggered.
+            controls.gameplay.SetCallbacks(this);
+        }
+        controls.gameplay.Enable();
+    }
+
+    public void OnDisable()
+    {
+        controls.gameplay.Disable();
+    }
+
+    public void OnUse(InputAction.CallbackContext context)
+    {
+        // 'Use' code here.
+        
+    }
+
+    public void OnMove(InputAction.CallbackContext context)
+    {
+        // 'Move' code here.
+    }
+
     void Start()
     {
 
@@ -17,6 +48,7 @@ public class PlayerController : MonoBehaviour
     }
     private void FixedUpdate()
     {
+        /*  TO BE REMOVE DUE TO THE USE OF INPUTACTION
         if (Input.GetKey(KeyCode.D))
         {
             characterMovement.MoveRight(gameObject);
@@ -38,6 +70,6 @@ public class PlayerController : MonoBehaviour
         {
             //upward speed = 0
 
-        }
+        }*/
     }
 }

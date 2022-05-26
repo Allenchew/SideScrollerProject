@@ -6,14 +6,14 @@ namespace Physics
 {
     public class Gravity
     {
-        private const float gravityPull = 9.8f;
-        private float gravityMultiplier;
+        private const float gravityPull = 0.98f;
+        private float gravityMultiplier = 1.0f;
         
         public float GravityMultiplier { get { return gravityMultiplier; } set { gravityMultiplier = value; } }
 
-        public void ApplyGravity(GameObject gameObject)
+        public float ApplyGravity()
         {
-            //gameObject.transform.localPosition +=  
+            return gravityPull * GravityMultiplier;
         }
         
 
