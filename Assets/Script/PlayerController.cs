@@ -1,12 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, Playercontrols.IPlayerActions
 {
     private Movement characterMovement = new Movement();
-
+    
     Playercontrols controls;
     public void OnEnable()
     {
@@ -15,30 +15,42 @@ public class PlayerController : MonoBehaviour
             controls = new Playercontrols();
             // Tell the "gameplay" action map that we want to get told about
             // when actions get triggered.
-            controls.gameplay.SetCallbacks(this);
+            controls.Player.SetCallbacks(this);
         }
-        controls.gameplay.Enable();
+        controls.Player.Enable();
     }
 
     public void OnDisable()
     {
-        controls.gameplay.Disable();
+        controls.Player.Disable();
+    }
+    
+    public void OnWASD(InputAction.CallbackContext context)
+    {
+        if (context.control.IsPressed())
+        {
+            Debug.Log("pressed");
+        }
+        if(context.control.displayName == "D")
+        {
+            characterMovement.MoveRight(gameObject);
+        }
+        else if(context.control.displayName == "A")
+        {
+            characterMovement.MoveLeft(gameObject);
+        }
+        //throw new System.NotImplementedException();
     }
 
-    public void OnUse(InputAction.CallbackContext context)
+    public void OnJump(InputAction.CallbackContext context)
     {
-        // 'Use' code here.
         
-    }
-
-    public void OnMove(InputAction.CallbackContext context)
-    {
-        // 'Move' code here.
+        //throw new System.NotImplementedException();
     }
 
     void Start()
     {
-
+        
     }
 
     // Update is called once per frame
@@ -49,15 +61,6 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         /*  TO BE REMOVE DUE TO THE USE OF INPUTACTION
-        if (Input.GetKey(KeyCode.D))
-        {
-            characterMovement.MoveRight(gameObject);
-        }
-        else if (Input.GetKey(KeyCode.A))
-        {
-            characterMovement.MoveLeft(gameObject);
-        }
-
         if (Input.GetKeyDown(KeyCode.Space))
         {
             //initial jump,set upward speed
@@ -72,4 +75,6 @@ public class PlayerController : MonoBehaviour
 
         }*/
     }
+
+    
 }
