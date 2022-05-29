@@ -13,16 +13,12 @@ public class Movement : Gravity
         set { defaultSpeed = value; }
     }
 
-    public void MoveRight(GameObject gameObject)
+    public void MoveHorizontal(GameObject gameObject,Vector2 direction)
     {
-        gameObject.transform.localPosition += gameObject.transform.right * defaultSpeed;
+        gameObject.transform.localPosition += new Vector3(direction.x * defaultSpeed,0,0);
     }
     
-    public void MoveLeft(GameObject gameObject)
-    {
-        gameObject.transform.localPosition += gameObject.transform.right * -defaultSpeed;
-    }
-    
+   
     public void InitiateJump(GameObject gameObject)
     {
 
