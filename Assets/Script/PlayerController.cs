@@ -6,8 +6,8 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    Playercontrols controls;
-    Movement characterMovement;
+    private Playercontrols controls;
+    private Movement characterMovement;
     private void Awake()
     {
         controls = new();
