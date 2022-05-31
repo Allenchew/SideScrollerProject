@@ -1,21 +1,26 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Physics;
 
-public class Movement : Gravity
+/*public class Movement
 {
     private float defaultSpeed = 1.0f;
-    
+
+    public float RunSpeed = 1.0f;
+    public float AccelerateSpeed = 1.0f;
+    public float DecelerateSpeed = 1.0f;
+
+
     public float MovementSpeed
     {
         get { return defaultSpeed; }
         set { defaultSpeed = value; }
     }
 
-    public void MoveHorizontal(GameObject gameObject,Vector2 direction)
+    public void ApplyRun(Vector2 direction)
     {
-        gameObject.transform.localPosition += new Vector3(direction.x * defaultSpeed,0,0);
+        
     }
     
    
@@ -29,5 +34,5 @@ public class Movement : Gravity
 
     }
 
-}
+}*/
 

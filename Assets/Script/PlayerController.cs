@@ -6,27 +6,33 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    public float MoveSpeed = 1.0f;
+    public float AccelerateSpeed = 1.0f;
+    public float DecelerateSpeed = -1.0f;
+    public float VelPower = 1.0f;
+    public float jumpForce = 1.0f;
+    public Rigidbody2D rb;
+    
     private Playercontrols controls;
-    private Movement characterMovement;
+    private float targetSpeed;
+    private float speedDif;
+    private float accelerateRate;
+    private float movement;
+
+    private float lastGroundedTime = 0;
+    private float lastJumpTime = 0;
+    private bool isJumping;
+    private bool jumpInputReleased;
+
     private void Awake()
     {
         controls = new();
-        characterMovement = new();
+
     }
     void Start()
     {
+        rb = GetComponent<Rigidbody2D>();
         
-    }
-   
-    void Update()
-    {
-        controls.Player.Move.started += Move;
-    }
-
-    private void Move(InputAction.CallbackContext context)
-    {
-        var movementDirection = context.ReadValue<Vector2>();
-        characterMovement.MoveHorizontal(gameObject, movementDirection);
     }
     public void OnEnable()
     {
@@ -37,24 +43,43 @@ public class PlayerController : MonoBehaviour
     {
         controls.Player.Disable();
     }
+    void Update()
+    {
+        
+    }
 
     private void FixedUpdate()
     {
-        /*  TO BE REMOVE DUE TO THE USE OF INPUTACTION
-        if (Input.GetKeyDown(KeyCode.Space))
+        Vector2 playerInput = controls.Player.Move.ReadValue<Vector2>();
+        ApplyRun(playerInput);
+        if (Physics2D.OverlapBox(new Vector2(gameObject.transform.localPosition.x, gameObject.transform.localPosition.y), new Vector2(1, 1), 0))
         {
-            //initial jump,set upward speed
+            controls.Player.Jump.started += ApplyJump;
         }
-        else if (Input.GetKey(KeyCode.Space))
-        {
-            // while holding, upward speed decrease towards 0(decrease by gravity downward speed)
-        }
-        else if (Input.GetKeyUp(KeyCode.Space))
-        {
-            //upward speed = 0
-
-        }*/
+        controls.Player.Jump.canceled += JumpCut;
     }
 
-    
+    private void ApplyRun(Vector2 controlInput)
+    {
+        targetSpeed = controlInput.x * MoveSpeed;
+        speedDif = targetSpeed - rb.velocity.x;
+        accelerateRate = (Math.Abs(targetSpeed) > 0.01f) ? AccelerateSpeed : DecelerateSpeed;
+        movement = MathF.Pow(Math.Abs(speedDif) * accelerateRate, VelPower) * Math.Sign(speedDif);
+        rb.AddForce(movement * Vector2.right);
+    }
+
+    private void ApplyJump(InputAction.CallbackContext context)
+    {
+        Debug.Log("jumped");
+        rb.AddForce(Vector2.up * jumpForce,ForceMode2D.Impulse);
+        lastGroundedTime = 0;
+        lastJumpTime = 0;
+        isJumping = true;
+        jumpInputReleased = false;
+    }
+
+    private void JumpCut(InputAction.CallbackContext context)
+    {
+
+    }
 }
