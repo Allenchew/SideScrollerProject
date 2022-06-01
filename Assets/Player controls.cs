@@ -51,7 +51,7 @@ public partial class @Playercontrols : IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""88fa01fb-bb76-4085-a88e-f08b57ef0058"",
                     ""path"": ""<Keyboard>/space"",
-                    ""interactions"": ""Hold,MultiTap"",
+                    ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Jump"",

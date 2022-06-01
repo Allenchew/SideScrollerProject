@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d9e00c240741044da2c12ea30d629db, type: 3}
+  m_Name: PlayerControlData
+  m_EditorClassIdentifier: 
+  RunMaxSpeed: 8
+  RunAccel: 2
+  RunDeccel: 3
+  AccelInAir: 0
+  DeccelInAir: 0
+  AccelPower: 1.5
+  StopPower: 0
+  TurnPower: 0
+  CoyoteByFrame: 4
+  JumpForce: 15
+  IsJumping: 0
