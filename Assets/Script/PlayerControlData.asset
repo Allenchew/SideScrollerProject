@@ -13,13 +13,17 @@ MonoBehaviour:
   m_Name: PlayerControlData
   m_EditorClassIdentifier: 
   RunMaxSpeed: 8
-  RunAccel: 2
+  RunAccel: 4
   RunDeccel: 3
-  AccelInAir: 0
-  DeccelInAir: 0
+  FrictionAmount: 0.5
+  AccelInAir: 0.5
+  DeccelInAir: 0.5
   AccelPower: 1.5
   StopPower: 0
   TurnPower: 0
-  CoyoteByFrame: 4
-  JumpForce: 15
+  CoyoteByFrame: 8
+  JumpForce: 14
+  FallMultiplier: 2
+  FastFallMultipler: 3
   IsJumping: 0
+  JumpCutMultiplier: 0.5

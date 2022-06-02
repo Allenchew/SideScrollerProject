@@ -12,6 +12,7 @@ public class ControlData : ScriptableObject
 	public float RunMaxSpeed;
 	public float RunAccel;
 	public float RunDeccel;
+	public float FrictionAmount;
 	[Range(0, 1)] public float AccelInAir;
 	[Range(0, 1)] public float DeccelInAir;
 	[Space(5)]
@@ -22,11 +23,13 @@ public class ControlData : ScriptableObject
 	[Header("Jump")]
 	public int CoyoteByFrame;
 	public float JumpForce;
+	public float FallMultiplier;
+	public float FastFallMultipler;
 	public bool IsJumping;
+	[Range(0, 1)] public float JumpCutMultiplier;
 
-// TODO: Add Coyote
 // TODO: Add custom gravity to override physics gravity
-// TODO: Add Jump and Double Jump Parameter
+// TODO: Add Double Jump Parameter
 // TODO: Add Drag
 // TODO: Add Wall Jump Parameter
 // TODO: Add Dash Parameter
