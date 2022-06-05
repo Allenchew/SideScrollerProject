@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     private float accelerateRate;
     private float movement;
     private int coyote = 0;
+    private int dashFrameCount = 0;
 
     private void Awake()
     {
@@ -43,7 +44,6 @@ public class PlayerController : MonoBehaviour
         
     }
 
-    // TODO Add extra gravity when falling
     // TODO Apply wall detection
     // TODO prevent player to stick to wall with direction key
     // TODO Add Wall Jump
@@ -53,7 +53,10 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         Vector2 playerInput = controls.Player.Move.ReadValue<Vector2>();
-        ApplyRun(playerInput);
+
+        if(Mathf.Abs(playerInput.x) > 0 && !playerControlData.IsDashing)
+            ApplyRun(playerInput);
+
         ApplyFriction();
 
         if (!playerControlData.IsJumping)
@@ -65,6 +68,7 @@ public class PlayerController : MonoBehaviour
             CheckCoyote();
             
         }
+
         if(playerControlData.IsJumping && IsOnGround() && !IsJumpKeyPress())
         {
             playerControlData.IsJumping = false;
@@ -74,16 +78,35 @@ public class PlayerController : MonoBehaviour
         {
             ApplyJumpCut();
         }
-        if (IsFalling())
+        if (IsFalling() && !playerControlData.IsDashing)
         {
             if (IsDownKeyPress())
                 SetGravityScale(playerControlData.FastFallMultipler);
             else
                 SetGravityScale(playerControlData.FallMultiplier);
+        }else if (playerControlData.IsDashing)
+        {
+            SetGravityScale(0);
         }
         else
         {
             SetGravityScale(1.0f);
+        }
+
+        if (IsDashKeyPress() && !playerControlData.IsDashing)
+        {
+            playerControlData.IsDashing = true;
+            ApplyDash();
+        }
+
+        if(playerControlData.IsDashing && dashFrameCount < playerControlData.DashFrame)
+        {
+            dashFrameCount++;
+        }
+        else
+        {
+            playerControlData.IsDashing = false;
+            StopDash();
         }
     }
 
@@ -91,6 +114,7 @@ public class PlayerController : MonoBehaviour
     {
         targetSpeed = controlInput.x * playerControlData.RunMaxSpeed;
         speedDif = targetSpeed - rb.velocity.x;
+        SetFacing();
         if(IsOnGround())
             accelerateRate = (Math.Abs(targetSpeed) > 0.01f) ? playerControlData.RunAccel : playerControlData.RunDeccel;
         else
@@ -99,12 +123,31 @@ public class PlayerController : MonoBehaviour
         rb.AddForce(movement * Vector2.right);
     }
 
+    private void SetFacing()
+    {
+        if (targetSpeed > 0.1f)
+            playerControlData.FaceRight = true;
+        else if (targetSpeed < -0.1f)
+            playerControlData.FaceRight = false;
+    }
     private void ApplyJump()
     {
         playerControlData.IsJumping = true;
         rb.AddForce(Vector2.up * playerControlData.JumpForce,ForceMode2D.Impulse);
     }
 
+
+    private void ApplyDash()
+    {
+        Vector2 dashDirection = playerControlData.FaceRight ? Vector2.right : Vector2.left;
+        rb.AddForce(dashDirection * playerControlData.DashSpeed, ForceMode2D.Impulse);
+        
+    }
+    private void StopDash()
+    {
+        rb.AddForce(rb.velocity.x * Vector2.right);
+        dashFrameCount = 0;
+    }
     private void CheckCoyote()
     {
         if (!IsOnGround() && coyote < playerControlData.CoyoteByFrame)
@@ -145,6 +188,7 @@ public class PlayerController : MonoBehaviour
     {
         return rb.velocity.y < 0;
     }
+
     private bool IsJumpKeyPress()
     {
         return controls.Player.Jump.ReadValue<float>() > 0;
@@ -152,6 +196,10 @@ public class PlayerController : MonoBehaviour
     private bool IsDownKeyPress()
     {
         return controls.Player.Move.ReadValue<Vector2>().y < 0;
+    }
+    private bool IsDashKeyPress()
+    {
+        return controls.Player.Dash.ReadValue<float>() > 0;
     }
 }
 

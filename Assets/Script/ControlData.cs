@@ -13,6 +13,7 @@ public class ControlData : ScriptableObject
 	public float RunAccel;
 	public float RunDeccel;
 	public float FrictionAmount;
+	public bool FaceRight;
 	[Range(0, 1)] public float AccelInAir;
 	[Range(0, 1)] public float DeccelInAir;
 	[Space(5)]
@@ -27,6 +28,11 @@ public class ControlData : ScriptableObject
 	public float FastFallMultipler;
 	public bool IsJumping;
 	[Range(0, 1)] public float JumpCutMultiplier;
+
+	[Header("Dash")]
+	public float DashSpeed;
+	public bool IsDashing;
+	public int DashFrame;
 
 // TODO: Add custom gravity to override physics gravity
 // TODO: Add Double Jump Parameter
