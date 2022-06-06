@@ -7,7 +7,6 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Player/PlayerMovementData")]
 public class ControlData : ScriptableObject
 {
-
     [Header("Run")]
 	public float RunMaxSpeed;
 	public float RunAccel;
@@ -24,20 +23,22 @@ public class ControlData : ScriptableObject
 	[Header("Jump")]
 	public int CoyoteByFrame;
 	public float JumpForce;
-	public float FallMultiplier;
-	public float FastFallMultipler;
 	public bool IsJumping;
 	[Range(0, 1)] public float JumpCutMultiplier;
 
 	[Header("Dash")]
 	public float DashSpeed;
+	public float StopSpeed;
 	public bool IsDashing;
 	public int DashFrame;
 
-// TODO: Add custom gravity to override physics gravity
-// TODO: Add Double Jump Parameter
-// TODO: Add Drag
-// TODO: Add Wall Jump Parameter
-// TODO: Add Dash Parameter
+	[Header("Gravity")]
+	public float FallMultiplier;
+	public float FastFallMultipler;
+	public float OnWallFallGravity;
+
+	// TODO: Add Double Jump Parameter
+	// TODO: Add Drag
+	// TODO: Add Wall Jump Parameter
 }
 
