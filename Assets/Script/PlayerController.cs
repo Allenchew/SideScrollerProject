@@ -27,12 +27,14 @@ public class PlayerController : MonoBehaviour
         controls = new();
 
     }
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = DefaultGravityScale;
         controls.Player.Dash.started += ApplyDash;
     }
+
     public void OnEnable()
     {
         controls.Player.Enable();
@@ -42,13 +44,18 @@ public class PlayerController : MonoBehaviour
     {
         controls.Player.Disable();
     }
+
     void Update()
     {
         
     }
 
     // TODO : Apply wall detection
-    // TODO : Add Wall Jump
+    // TODO : Add Sticky Wall
+    // TODO : Adjust Wall Jump
+    // TODO : prevent wall jump while at ground
+    // TODO : add reset point for wall jump
+    // TODO : add interval for dash
     // TODO : Coyote for wall jump
     // TODO : Tidy up and seperate Codes
     private void FixedUpdate()
@@ -63,8 +70,9 @@ public class PlayerController : MonoBehaviour
         if (!playerControlData.IsDashing)
         {
             ApplyFriction();
-
         }
+
+        
 
         if (!playerControlData.IsJumping && !playerControlData.IsDashing)
         {
@@ -73,9 +81,17 @@ public class PlayerController : MonoBehaviour
                 ApplyJump();
             }
             CheckCoyote();
+        }else if ((IsAtLeftWall() || IsAtRightWall()) && !playerControlData.IsDashing && !IsOnGround() && IsJumpKeyPress() && !playerControlData.IsWallJumping)
+        {
+            playerControlData.IsWallJumping = true;
+            ApplyWallJump();
+        }
+        else if ((IsAtLeftWall() || IsAtRightWall()) && playerControlData.IsWallJumping && !IsJumpKeyPress())
+        {
+            playerControlData.IsWallJumping = false;
         }
 
-        if(playerControlData.IsJumping && IsOnGround() && !IsJumpKeyPress())
+        if (playerControlData.IsJumping && IsOnGround() && !IsJumpKeyPress())
         {
             playerControlData.IsJumping = false;
         }
@@ -110,8 +126,8 @@ public class PlayerController : MonoBehaviour
             {
                 SetGravityScale(playerControlData.FallMultiplier);
             }
-
-        }else if (playerControlData.IsDashing)
+        }
+        else if (playerControlData.IsDashing)
         {
             SetGravityScale(0);
         }
@@ -119,7 +135,10 @@ public class PlayerController : MonoBehaviour
         {
             SetGravityScale(1.0f);
         }
+
+        
     }
+
     private void SetFacing()
     {
         if (targetSpeed > 0.1f)
@@ -131,6 +150,7 @@ public class PlayerController : MonoBehaviour
             playerControlData.FaceRight = false;
         }
     }
+
     private void ApplyRun(Vector2 controlInput)
     {
         targetSpeed = controlInput.x * playerControlData.RunMaxSpeed;
@@ -162,6 +182,14 @@ public class PlayerController : MonoBehaviour
         rb.AddForce(Vector2.up * playerControlData.JumpForce,ForceMode2D.Impulse);
     }
 
+    private void ApplyWallJump()
+    {
+        Vector2 jumpDirection = IsAtLeftWall() ? Vector2.right : Vector2.left;
+        rb.velocity = Vector2.zero;
+        rb.angularVelocity = 0f;
+        rb.AddForce((Vector2.up + (jumpDirection*0.5f))*playerControlData.JumpForce, ForceMode2D.Impulse);
+    }
+
     private void CheckCoyote()
     {
         if (!IsOnGround() && coyote < playerControlData.CoyoteByFrame)
@@ -173,10 +201,12 @@ public class PlayerController : MonoBehaviour
             coyote = 0;
         }
     }
+
     private void ApplyJumpCut()
     {
         rb.AddForce(Vector2.down * rb.velocity.y * (1 - playerControlData.JumpCutMultiplier), ForceMode2D.Impulse);
     }
+
     private void ApplyDash(InputAction.CallbackContext context)
     {
         if (!playerControlData.IsDashing)
@@ -187,12 +217,14 @@ public class PlayerController : MonoBehaviour
             rb.AddForce(dashDirection * playerControlData.DashSpeed, ForceMode2D.Impulse);
         }
     }
+
+
     private void StopDash()
     {
         if (Mathf.Abs(rb.velocity.x) > 0.1f)
         {
-            Vector2 dashDirection = playerControlData.FaceRight ? Vector2.left : Vector2.right;
-            rb.AddForce(dashDirection * playerControlData.StopSpeed, ForceMode2D.Impulse);
+            rb.velocity = Vector2.zero;
+            rb.angularVelocity = 0f;
         }
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         dashFrameCount = 0;
@@ -228,7 +260,7 @@ public class PlayerController : MonoBehaviour
         => Physics2D.OverlapBox(transform.position + new Vector3(0.5f, 0, 0), new Vector2(0.1f, 1f), 0, WallMask);
     
     private bool IsFalling() 
-        => rb.velocity.y < 0;
+        => rb.velocity.y < -0.01f;
 
     private bool IsJumpKeyPress()
         => controls.Player.Jump.ReadValue<float>() > 0;

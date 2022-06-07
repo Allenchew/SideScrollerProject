@@ -24,7 +24,9 @@ public class ControlData : ScriptableObject
 	public int CoyoteByFrame;
 	public float JumpForce;
 	public bool IsJumping;
+	public bool IsWallJumping;
 	[Range(0, 1)] public float JumpCutMultiplier;
+
 
 	[Header("Dash")]
 	public float DashSpeed;
