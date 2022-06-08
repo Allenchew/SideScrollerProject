@@ -13,18 +13,20 @@ MonoBehaviour:
   m_Name: PlayerControlData
   m_EditorClassIdentifier: 
   RunMaxSpeed: 8
-  RunAccel: 4
-  RunDeccel: 3
+  RunAccel: 7
+  RunDeccel: 8
   FrictionAmount: 1
-  FaceRight: 0
+  FaceRight: 1
   AccelInAir: 0.2
   DeccelInAir: 0.4
   AccelPower: 1.5
   StopPower: 0
   TurnPower: 0
   CoyoteByFrame: 4
+  StickyWallFrame: 4
   JumpForce: 14
   IsJumping: 0
+  IsWallJumping: 0
   JumpCutMultiplier: 0.5
   DashSpeed: 15
   StopSpeed: 14

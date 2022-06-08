@@ -20,7 +20,9 @@ public class PlayerController : MonoBehaviour
     private float accelerateRate;
     private float movement;
     private int coyote = 0;
+    private int wallCoyote = 0;
     private int dashFrameCount = 0;
+    private bool jumpKeyUp = true;
 
     private void Awake()
     {
@@ -33,6 +35,9 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = DefaultGravityScale;
         controls.Player.Dash.started += ApplyDash;
+        controls.Player.Jump.started += _ => { Debug.Log("started"); };
+        controls.Player.Jump.performed += _ => { Debug.Log("performed"); };
+        controls.Player.Jump.canceled += _ => { Debug.Log("canceled"); };
     }
 
     public void OnEnable()
@@ -43,11 +48,6 @@ public class PlayerController : MonoBehaviour
     public void OnDisable()
     {
         controls.Player.Disable();
-    }
-
-    void Update()
-    {
-        
     }
 
     // TODO : Apply wall detection
@@ -72,8 +72,6 @@ public class PlayerController : MonoBehaviour
             ApplyFriction();
         }
 
-        
-
         if (!playerControlData.IsJumping && !playerControlData.IsDashing)
         {
             if (IsJumpKeyPress() && coyote < playerControlData.CoyoteByFrame) 
@@ -81,7 +79,7 @@ public class PlayerController : MonoBehaviour
                 ApplyJump();
             }
             CheckCoyote();
-        }else if ((IsAtLeftWall() || IsAtRightWall()) && !playerControlData.IsDashing && !IsOnGround() && IsJumpKeyPress() && !playerControlData.IsWallJumping)
+        }else if ((IsAtLeftWall() || IsAtRightWall()) && controls.Player.Jump.IsPressed() &&!playerControlData.IsDashing && !IsOnGround()  && !playerControlData.IsWallJumping)
         {
             playerControlData.IsWallJumping = true;
             ApplyWallJump();
@@ -105,7 +103,6 @@ public class PlayerController : MonoBehaviour
         {
             dashFrameCount++;
         }
-
         else if (playerControlData.IsDashing && dashFrameCount >= playerControlData.DashFrame)
         {
             playerControlData.IsDashing = false;
@@ -120,7 +117,12 @@ public class PlayerController : MonoBehaviour
             }
             else if ((IsAtLeftWall() && playerInput.x < 0) || (IsAtRightWall() && playerInput.x > 0))
             {
-                SetGravityScale(playerControlData.OnWallFallGravity);
+                if(wallCoyote < playerControlData.StickyWallFrame)
+                {
+                    wallCoyote++;
+                    SetGravityScale(0);
+                }else
+                    SetGravityScale(playerControlData.OnWallFallGravity);
             }
             else
             {
@@ -135,7 +137,6 @@ public class PlayerController : MonoBehaviour
         {
             SetGravityScale(1.0f);
         }
-
         
     }
 
@@ -184,6 +185,7 @@ public class PlayerController : MonoBehaviour
 
     private void ApplyWallJump()
     {
+        wallCoyote = 0;
         Vector2 jumpDirection = IsAtLeftWall() ? Vector2.right : Vector2.left;
         rb.velocity = Vector2.zero;
         rb.angularVelocity = 0f;
@@ -240,18 +242,13 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void ApplyWallFriction()
-    {
-
-    }
-
     private void SetGravityScale(float scaler)
     {
         rb.gravityScale = DefaultGravityScale * scaler;
     }
 
     private bool IsOnGround()
-        => Physics2D.OverlapBox(transform.position - new Vector3(0, 0.5f, 0), new Vector2(1f, 0.1f), 0, GroundMask);
+        => Physics2D.OverlapBox(transform.position - new Vector3(0, 0.5f, 0), new Vector2(0.9f, 0.1f), 0, GroundMask);
     
     private bool IsAtLeftWall() 
         => Physics2D.OverlapBox(transform.position - new Vector3(0.5f, 0, 0), new Vector2(0.1f, 1f), 0, WallMask);
@@ -263,10 +260,14 @@ public class PlayerController : MonoBehaviour
         => rb.velocity.y < -0.01f;
 
     private bool IsJumpKeyPress()
-        => controls.Player.Jump.ReadValue<float>() > 0;
+        => controls.Player.Jump.ReadValue<float>() > ControllerDeadzone;
     
     private bool IsDownKeyPress()
-        => controls.Player.Move.ReadValue<Vector2>().y < 0;
+        => controls.Player.Move.ReadValue<Vector2>().y < -ControllerDeadzone;
     
+    private void JumpKeyReleased()
+    {
+        jumpKeyUp = true;
+    }
 }
 

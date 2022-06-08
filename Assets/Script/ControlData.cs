@@ -22,6 +22,7 @@ public class ControlData : ScriptableObject
 
 	[Header("Jump")]
 	public int CoyoteByFrame;
+	public int StickyWallFrame;
 	public float JumpForce;
 	public bool IsJumping;
 	public bool IsWallJumping;
