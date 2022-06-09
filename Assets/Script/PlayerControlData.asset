@@ -16,17 +16,18 @@ MonoBehaviour:
   RunAccel: 7
   RunDeccel: 8
   FrictionAmount: 1
-  FaceRight: 1
+  FaceRight: 0
   AccelInAir: 0.2
-  DeccelInAir: 0.4
+  DeccelInAir: 1
   AccelPower: 1.5
   StopPower: 0
   TurnPower: 0
-  CoyoteByFrame: 4
+  CoyoteByFrame: 8
   StickyWallFrame: 4
+  WallCoyoteByFrame: 4
   JumpForce: 14
   IsJumping: 0
-  IsWallJumping: 0
+  IsWallJumping: 1
   JumpCutMultiplier: 0.5
   DashSpeed: 15
   StopSpeed: 14
@@ -34,4 +35,4 @@ MonoBehaviour:
   DashFrame: 10
   FallMultiplier: 2
   FastFallMultipler: 3
-  OnWallFallGravity: 0.3
+  OnWallFallGravity: 0.1
