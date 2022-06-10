@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -11,6 +9,7 @@ public class PlayerController : MonoBehaviour
     public Rigidbody2D rb;
     public LayerMask GroundMask;
     public LayerMask WallMask;
+    public LayerMask CeilingMask;
     public float DefaultGravityScale = 3;
     public float ControllerDeadzone = 0.01f;
 
@@ -23,12 +22,10 @@ public class PlayerController : MonoBehaviour
     private int wallCoyote = 0;
     private int stickyCoyote = 0;
     private int dashFrameCount = 0;
-    private bool jumpKeyUp = true;
 
     private void Awake()
     {
         controls = new();
-
     }
 
     void Start()
@@ -50,8 +47,8 @@ public class PlayerController : MonoBehaviour
     }
 
     // TODO : Adjust Wall Jump     **need to test and get feed back first
-    // TODO : prevent wall jump while at ground
-    // TODO : add interval for dash and reset dash while on ground or on wall
+    // TODO : add interval for dash and reset dash while on ground or on wall ( or just put cd )
+    // TODO : to fix cannot jump after dash
     // TODO : Tidy up and seperate Codes
     //-----------------------------------------------------------------
 
@@ -124,6 +121,10 @@ public class PlayerController : MonoBehaviour
             SetGravityScale(1.0f);
         }
 
+        if((playerControlData.IsJumping || playerControlData.IsWallJumping) && IsHitTop() && !IsFalling())
+        {
+            rb.velocity = new Vector2(rb.velocity.x, 0);
+        }
     }
 
     private void SetFacing()
@@ -173,7 +174,7 @@ public class PlayerController : MonoBehaviour
             }
 
         }
-        if (IsAtWall() || IsUnderWallCoyote())
+        if ((IsAtWall() || IsUnderWallCoyote())&& !IsOnGround())
         {
             if (!playerControlData.IsDashing && !playerControlData.IsWallJumping)
             {
@@ -265,14 +266,17 @@ public class PlayerController : MonoBehaviour
     }
 
     private bool IsOnGround()
-        => Physics2D.OverlapBox(transform.position - new Vector3(0, 0.5f, 0), new Vector2(0.9f, 0.1f), 0, GroundMask);
+        => Physics2D.OverlapBox(transform.localPosition - new Vector3(0, 0.5f, 0), new Vector2(0.9f, 0.1f), 0, GroundMask);
 
     private bool IsAtLeftWall()
-        => Physics2D.OverlapBox(transform.position - new Vector3(0.5f, -0.1f, 0), new Vector2(0.1f, 0.9f), 0, WallMask | GroundMask);
+        => Physics2D.OverlapBox(transform.localPosition - new Vector3(0.5f, -0.1f, 0), new Vector2(0.1f, 0.9f), 0, WallMask | GroundMask);
 
     private bool IsAtRightWall()
-        => Physics2D.OverlapBox(transform.position + new Vector3(0.5f, 0.1f, 0), new Vector2(0.1f, 0.9f), 0, WallMask | GroundMask);
-    
+        => Physics2D.OverlapBox(transform.localPosition + new Vector3(0.5f, 0.1f, 0), new Vector2(0.1f, 0.9f), 0, WallMask | GroundMask);
+
+    private bool IsHitTop()
+        => Physics2D.OverlapBox(transform.localPosition + new Vector3(0, 0.5f, 0), new Vector2(0.9f, 0.1f), 0,CeilingMask);
+
     private bool IsAtWall()
         => IsAtLeftWall() || IsAtRightWall();
     private bool IsFalling() 
@@ -290,9 +294,5 @@ public class PlayerController : MonoBehaviour
     private bool IsDownKeyPress()
         => controls.Player.Move.ReadValue<Vector2>().y < -ControllerDeadzone;
     
-    private void JumpKeyReleased()
-    {
-        jumpKeyUp = true;
-    }
 }
 

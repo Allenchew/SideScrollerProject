@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-[CreateAssetMenu(menuName = "Player/PlayerMovementData")]
+[CreateAssetMenu(menuName = "Script/PlayerControlData")]
 public class ControlData : ScriptableObject
 {
     [Header("Run")]
@@ -43,6 +43,5 @@ public class ControlData : ScriptableObject
 
 	// TODO: Add Double Jump Parameter
 	// TODO: Add Drag
-	// TODO: Add Wall Jump Parameter
 }
 
