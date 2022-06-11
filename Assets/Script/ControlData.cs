@@ -7,7 +7,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Script/PlayerControlData")]
 public class ControlData : ScriptableObject
 {
-    [Header("Run")]
+	[Header("Run")]
 	public float RunMaxSpeed;
 	public float RunAccel;
 	public float RunDeccel;
@@ -22,13 +22,17 @@ public class ControlData : ScriptableObject
 
 	[Header("Jump")]
 	public int CoyoteByFrame;
-	public int StickyWallFrame;
-	public int WallCoyoteByFrame;
 	public float JumpForce;
 	public bool IsJumping;
-	public bool IsWallJumping;
 	[Range(0, 1)] public float JumpCutMultiplier;
 
+	[Header("WallJump")]
+	public int StickyWallFrame;
+	public int WallCoyoteByFrame;
+	public int FixedWallJumpFrame;
+	[Range(0,1)]public float UpJumpForce;
+	[Range(0, 1)]public float SideJumpForce;
+	public bool IsWallJumping;
 
 	[Header("Dash")]
 	public float DashSpeed;

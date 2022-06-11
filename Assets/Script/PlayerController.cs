@@ -21,7 +21,10 @@ public class PlayerController : MonoBehaviour
     private int coyote = 0;
     private int wallCoyote = 0;
     private int stickyCoyote = 0;
+    private int wallJumpFrame = 0;
     private int dashFrameCount = 0;
+    private bool isWallSlide = false;
+
 
     private void Awake()
     {
@@ -49,6 +52,7 @@ public class PlayerController : MonoBehaviour
     // TODO : Adjust Wall Jump     **need to test and get feed back first
     // TODO : add interval for dash and reset dash while on ground or on wall ( or just put cd )
     // TODO : to fix cannot jump after dash
+    // TODO : to fix wall jump bug that when opposite direction pressed, it will jump toward wall
     // TODO : Tidy up and seperate Codes
     //-----------------------------------------------------------------
 
@@ -56,7 +60,16 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 playerInput = controls.Player.Move.ReadValue<Vector2>();
 
-        if (Mathf.Abs(playerInput.x) > 0 && !playerControlData.IsDashing)
+        CheckCoyote();
+        CheckWallCoyote();
+        CheckWallJumpFrame();
+        CheckWallSlide(playerInput);
+
+        if (!playerControlData.IsDashing && !playerControlData.IsWallJumping)
+        {
+            ApplyRun(playerInput);
+        }
+        else if(!IsWallJumpLocked() && IsMovementKeyPress() && !playerControlData.IsDashing)
         {
             ApplyRun(playerInput);
         }
@@ -65,16 +78,15 @@ public class PlayerController : MonoBehaviour
         {
             ApplyFriction();
         }
-        CheckCoyote();
-        CheckWallCoyote();
 
         if (playerControlData.IsJumping && IsOnGround() && !IsJumpKeyPress())
         {
             playerControlData.IsJumping = false;
         }
-        if (playerControlData.IsWallJumping && IsAtWall() && !IsJumpKeyPress())
+
+        if (IsAtWall() && !IsJumpKeyPress())
         {
-            playerControlData.IsWallJumping = false;
+            wallJumpFrame = 0;
         }
 
         if (playerControlData.IsJumping && !IsFalling() && !IsJumpKeyPress() && !IsAtWall())
@@ -98,13 +110,13 @@ public class PlayerController : MonoBehaviour
             {
                 SetGravityScale(playerControlData.FastFallMultipler);
             }
-            else if ((IsAtLeftWall() && playerInput.x < 0) || (IsAtRightWall() && playerInput.x > 0))
+            else if (isWallSlide)
             {
                 if (stickyCoyote < playerControlData.StickyWallFrame)
                 {
                     stickyCoyote++;
-                    SetGravityScale(0);
-                } else
+                    ZeroVerticalVelocity();
+                }else
                     SetGravityScale(playerControlData.OnWallFallGravity);
             }
             else
@@ -121,9 +133,9 @@ public class PlayerController : MonoBehaviour
             SetGravityScale(1.0f);
         }
 
-        if((playerControlData.IsJumping || playerControlData.IsWallJumping) && IsHitTop() && !IsFalling())
+        if ((playerControlData.IsJumping || playerControlData.IsWallJumping) && IsHitTop() && !IsFalling())
         {
-            rb.velocity = new Vector2(rb.velocity.x, 0);
+            ZeroHorizontalVelocity();
         }
     }
 
@@ -174,30 +186,14 @@ public class PlayerController : MonoBehaviour
             }
 
         }
-        if ((IsAtWall() || IsUnderWallCoyote())&& !IsOnGround())
+        if ((IsAtWall() || IsUnderWallCoyote()) && !playerControlData.IsWallJumping && !IsOnGround())
         {
-            if (!playerControlData.IsDashing && !playerControlData.IsWallJumping)
+            if (!playerControlData.IsDashing)
             {
                 ApplyWallJump();
             }
 
         }
-    }
-
-    private void ApplyJump()
-    {
-        playerControlData.IsJumping = true;
-        rb.AddForce(Vector2.up * playerControlData.JumpForce, ForceMode2D.Impulse);
-    }
-
-    private void ApplyWallJump()
-    {
-        playerControlData.IsWallJumping = true;
-        wallCoyote = 0;
-        Vector2 jumpDirection = IsAtLeftWall() ? Vector2.right : Vector2.left;
-        rb.velocity = Vector2.zero;
-        rb.angularVelocity = 0f;
-        rb.AddForce((Vector2.up + (jumpDirection * 0.5f)) * playerControlData.JumpForce, ForceMode2D.Impulse);
     }
 
     private void CheckCoyote()
@@ -213,15 +209,70 @@ public class PlayerController : MonoBehaviour
     }
     private void CheckWallCoyote()
     {
-        if (!IsAtWall() && IsUnderWallCoyote() && !IsOnGround() && !playerControlData.IsWallJumping)
+        if (!IsAtWall() && IsUnderWallCoyote() && !IsOnGround())
         {
             wallCoyote++;
-        } else if (IsAtWall() || IsOnGround())
+        }
+        else if (IsAtWall() || IsOnGround())
         {
             wallCoyote = 0;
         }
     }
 
+    private void CheckWallJumpFrame()
+    {
+        if (wallJumpFrame < playerControlData.FixedWallJumpFrame)
+        {
+            wallJumpFrame++;
+        }
+        else
+        {
+            playerControlData.IsWallJumping = false;
+        }
+    }
+
+    private void CheckWallSlide(Vector2 playerInput)
+    {
+        if (isWallSlide && (!IsAtWall() || IsOnGround()))
+        {
+            isWallSlide = false;
+        }
+        else if((IsAtLeftWall() && playerInput.x < -ControllerDeadzone) 
+            || (IsAtRightWall() && playerInput.x > ControllerDeadzone))
+        {
+            isWallSlide = true;
+        }
+    }
+
+    private void ApplyJump()
+    {
+        Debug.Log("Applied Jump");
+        playerControlData.IsJumping = true;
+        rb.AddForce(Vector2.up * playerControlData.JumpForce, ForceMode2D.Impulse);
+    }
+
+    private void ApplyWallJump()
+    {
+        Debug.Log("Applied WallJump");
+        playerControlData.IsWallJumping = true;
+        wallCoyote = playerControlData.WallCoyoteByFrame;
+        stickyCoyote = 0;
+        Vector2 jumpDirection;
+        if (IsAtWall())
+        {
+            jumpDirection = IsAtLeftWall() ? Vector2.right : Vector2.left;
+        }
+        else
+        {
+            jumpDirection = playerControlData.FaceRight ? Vector2.right : Vector2.left;
+        }
+        rb.velocity = Vector2.zero;
+        rb.angularVelocity = 0f;
+        rb.AddForce((Vector2.up * playerControlData.UpJumpForce + jumpDirection * playerControlData.SideJumpForce)
+            * playerControlData.JumpForce, ForceMode2D.Impulse);
+    }
+
+   
     private void ApplyJumpCut()
     {
         rb.AddForce(Vector2.down * rb.velocity.y * (1 - playerControlData.JumpCutMultiplier), ForceMode2D.Impulse);
@@ -231,9 +282,18 @@ public class PlayerController : MonoBehaviour
     {
         if (!playerControlData.IsDashing)
         {
-            rb.constraints = RigidbodyConstraints2D.FreezePositionY | RigidbodyConstraints2D.FreezeRotation;
+            ZeroHorizontalVelocity();
+            ZeroVerticalVelocity();
             playerControlData.IsDashing = true;
-            Vector2 dashDirection = playerControlData.FaceRight ? Vector2.right : Vector2.left;
+            Vector2 dashDirection;
+            if (isWallSlide)
+            {
+                dashDirection = playerControlData.FaceRight ? Vector2.left : Vector2.right;
+            }
+            else
+                dashDirection = playerControlData.FaceRight ? Vector2.right : Vector2.left;
+
+
             rb.AddForce(dashDirection * playerControlData.DashSpeed, ForceMode2D.Impulse);
         }
     }
@@ -246,7 +306,6 @@ public class PlayerController : MonoBehaviour
             rb.velocity = Vector2.zero;
             rb.angularVelocity = 0f;
         }
-        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         dashFrameCount = 0;
     }
 
@@ -265,6 +324,16 @@ public class PlayerController : MonoBehaviour
         rb.gravityScale = DefaultGravityScale * scaler;
     }
 
+    private void ZeroHorizontalVelocity()
+    {
+        rb.velocity = new Vector2(0, rb.velocity.y);
+    }
+
+    private void ZeroVerticalVelocity()
+    {
+        rb.velocity = new Vector2(rb.velocity.x, 0);
+    }
+
     private bool IsOnGround()
         => Physics2D.OverlapBox(transform.localPosition - new Vector3(0, 0.5f, 0), new Vector2(0.9f, 0.1f), 0, GroundMask);
 
@@ -279,6 +348,8 @@ public class PlayerController : MonoBehaviour
 
     private bool IsAtWall()
         => IsAtLeftWall() || IsAtRightWall();
+
+
     private bool IsFalling() 
         => rb.velocity.y < -0.01f;
 
@@ -288,11 +359,18 @@ public class PlayerController : MonoBehaviour
     private bool IsUnderWallCoyote()
         => wallCoyote < playerControlData.WallCoyoteByFrame;
 
+    private bool IsWallJumpLocked()
+        => wallJumpFrame < playerControlData.FixedWallJumpFrame / 2;
+
+    
+
     private bool IsJumpKeyPress()
         => controls.Player.Jump.IsPressed();
     
     private bool IsDownKeyPress()
         => controls.Player.Move.ReadValue<Vector2>().y < -ControllerDeadzone;
-    
+
+    private bool IsMovementKeyPress()
+        => Mathf.Abs(controls.Player.Move.ReadValue<Vector2>().x) > ControllerDeadzone;
 }
 
