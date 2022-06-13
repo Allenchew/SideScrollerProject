@@ -39,6 +39,7 @@ public class ControlData : ScriptableObject
 	public float StopSpeed;
 	public bool IsDashing;
 	public int DashFrame;
+	public int DashCD;
 
 	[Header("Gravity")]
 	public float FallMultiplier;
